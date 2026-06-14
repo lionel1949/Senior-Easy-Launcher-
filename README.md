@@ -1,150 +1,141 @@
-# 老年桌面 (OldMan Launcher)
+# 老年桌面 · OldMan Launcher
 
-> Android 老年友好桌面启动器 — 项目分析与规划文档
->
-> 创建日期：2026-06-13
+> 一款面向老年人的 Android 桌面启动器，大字体、大图标、极简交互，让不熟悉智能手机的老人也能轻松使用。
 
----
-
-## 一、项目定位
-
-一款面向老年人的 Android 桌面替代应用（Launcher），以**大字体、大图标、极简交互**为核心，让不熟悉智能手机的老人也能轻松打电话、找到常用 App。
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.0-7F52FF?logo=kotlin)](https://kotlinlang.org)
+[![Compose](https://img.shields.io/badge/Jetpack_Compose-latest-4285F4?logo=android)](https://developer.android.com/compose)
+[![API](https://img.shields.io/badge/API-26+-brightgreen)](https://android-arsenal.com/api?level=26)
+[![License](https://img.shields.io/badge/License-MIT-blue)](LICENSE)
 
 ---
 
-## 二、核心功能需求
+## 功能
 
-### 用户原始需求（按优先级排列）
+| 功能 | 说明 |
+|------|------|
+| 📅 **阴阳历双显** | 主屏幕大字展示公历 + 农历日期，市面同类产品均未提供 |
+| 👤 **联系人快捷图标** | 大号头像 + 大字姓名，点击即可通话 |
+| 📞 **一键拨号** | 通过 `tel:` 协议直接拨打电话，无需进入通讯录 |
+| 💬 **微信跳转** | 跳转微信指定联系人聊天界面 |
+| 📱 **App 快捷方式** | 自定义常用 App 快捷图标 |
+| 🔒 **纯本地运行** | 无网也能用，所有数据存储在本地 Room 数据库 |
+| 🆓 **免费无广告** | 完全开源，无广告、无内购 |
 
-| 序号 | 需求 | 状态 |
-|------|------|------|
-| 1 | 大字体显示 | ✅ 必做 |
-| 2 | 阳历 + 阴历日期显示 | ✅ 必做（差异化功能） |
-| 3 | 联系人快捷图标（头像 + 名字） | ✅ 必做 |
-| 4 | 一键拨打电话（`tel:` 协议） | ✅ 必做 |
-| 5 | 跳转微信聊天界面 | ✅ 必做 |
-| 6 | 自定义 App 快捷方式 | ✅ 必做 |
-| 7 | 纯单机运行，本地存储 | ✅ 必做 |
-| 8 | 免费、无广告 | ✅ 必做 |
+### 亮点：阴阳历
 
-### 功能详解
-
-#### 📞 联系人快捷图标
-- 大号头像 + 大字姓名显示在桌面上
-- 点击后可选择：**直接打电话** 或 **跳转微信聊天**
-- 联系人信息本地录入（姓名、电话号码、微信 ID）
-
-#### 📱 微信跳转
-> **实际情况：微信不开放「一键发起语音/视频通话」的接口。**
-- 能做到：通过微信 URL Scheme 跳转到指定联系人的聊天界面
-- 做不到：直接发起语音通话或视频通话（需在微信内手动点击）
-- 折中方案：图标提供两个按钮——「打电话」和「打微信」
-
-#### 📅 阳历 + 阴历
-- 主屏幕顶部大字显示当前日期
-- 同时显示公历和农历（此功能市面上同类产品均未提供，是本项目的差异化亮点）
+市面上 **BIG Launcher、Senior Home、Senior Launcher、Simple Senior、Safe Home** 等竞品，无一提供农历显示。本项目是首个将农历集成到老年桌面的产品。
 
 ---
 
-## 三、技术方案
+## 技术栈
 
-| 维度 | 选择 | 理由 |
-|------|------|------|
-| **开发语言** | Kotlin | Android 原生首选 |
-| **UI 框架** | Jetpack Compose | 现代声明式 UI，做大字体自适应布局比 XML 高效 |
-| **本地存储** | Room | Google 官方推荐的 SQLite 抽象层 |
-| **农历算法** | 开源库 (LunarCalendar / ChineseCalendar) | 不需要自己算 |
-| **最低 SDK** | Android 8.0 (API 26) | 覆盖大部分老人机 |
+| 维度 | 选型 |
+|------|------|
+| 语言 | Kotlin |
+| UI | Jetpack Compose (Material 3) |
+| 数据库 | Room |
+| 架构 | MVVM (ViewModel + Repository) |
+| 最低 SDK | Android 8.0 (API 26) |
+| 目标 SDK | Android 14 (API 34) |
 
-### 关键权限
-
-| 权限 | 用途 | 敏感度 |
-|------|------|--------|
-| `CALL_PHONE` | 一键拨打电话 | 需用户授权 |
-| `READ_CONTACTS` | 读取系统联系人（可选，也可手动录入） | 需用户授权 |
-| `QUERY_ALL_PACKAGES` | 扫描已安装 App 用于添加快捷方式 | Android 11+ 需声明 |
-| 设为默认桌面 | 替换系统 Launcher | 用户手动确认 |
-| `CATEGORY_HOME` | 注册为桌面应用 | 在 Manifest 声明 |
+**零第三方依赖** — 仅在 AndroidX 生态内完成所有功能，包括农历算法也由内置 `LunarCalendarUtils` 实现。
 
 ---
 
-## 四、市场调研：同类产品对比
-
-调研了 5 款主流老年桌面产品：
-
-| 功能 | BIG Launcher | Senior Home | Senior Launcher | Simple Senior | Safe Home |
-|------|:--:|:--:|:--:|:--:|:--:|
-| 超大字体 + 大图标 | ✅ | ✅ | ✅ | ✅ | ✅ |
-| 一键拨号 | ✅ | ✅ | ✅ | ✅ | ✅ |
-| 联系人头像大图 | ✅ | ❌ | ✅ | ✅ | ✅ |
-| SOS + GPS 定位 | ✅ | ✅ | ✅ | ❌ | ✅ |
-| **阳历 + 阴历** | ❌ | ❌ | ❌ | ❌ | ❌ |
-| 微信适配 | 一般 | 一般 | 一般 | ⭐ | 一般 |
-| 隐藏系统 App | ✅ | ✅ | ✅ | ✅ | ✅ |
-| 密码保护设置 | ✅ | ❌ | ✅ | ❌ | ✅ |
-| 完全离线无广告 | ❌ | ✅ | ✅ | ✅ | ✅ |
-| 用户规模 | 200万+ | 中等 | 中等 | 较小 | 较小 |
-
-### 竞品主要缺失
-1. **全都没有农历/阴历** — 这是本项目的差异化切入点
-2. **微信适配大多一般** — Simple Senior 做得好，但闭源
-3. **SOS 功能是标配** — 普遍都有，本项目后续可考虑加入
-
-### 竞品亮点功能（可参考）
-- **SOS 一键求助**：自动发短信 + GPS 定位 + 自动拨打紧急联系人
-- **设置密码保护**：防止老人误改布局
-- **低电量醒目提醒**
-- **未读消息红点闪烁**
-- **手电筒快捷开关**
-
----
-
-## 五、复杂度 & 工期估算
-
-| 模块 | 难度 | 预估时间（业余） |
-|------|------|-----------------|
-| Launcher 框架搭建 + 桌面布局 | 🟡 中 | 1~2 周 |
-| 日历（阳历 + 阴历） | 🟡 中低 | 3~5 天 |
-| 联系人图标 + 快捷拨号 | 🟡 中低 | 3~5 天 |
-| App 快捷方式（扫描 + 添加） | 🟡 中 | 1 周 |
-| 微信跳转（调研 + 实现） | 🔴 较高 | 1 周 |
-| 大字体 + 老年友好 UI | 🟢 低 | 3~5 天 |
-| 打磨、真机测试 | 🟡 中 | 1~2 周 |
-| **合计** | 🟡 中等偏上 | **约 1~2 个月** |
-
----
-
-## 六、风险与注意事项
-
-| 风险 | 等级 | 说明 |
-|------|------|------|
-| 微信 URL Scheme 不稳定 | 🔴 高 | 微信未公开文档，民间探索的 `weixin://dl/chat?username=xxx` 可能随时失效 |
-| Launcher 在国产 ROM 上的兼容性 | 🟡 中 | 小米/华为/OPPO/vivo 等可能对默认桌面有限制 |
-| 阴历算法准确性 | 🟢 低 | 有成熟开源库，不存在技术风险 |
-| 上架国内应用市场 | 🟡 中 | 需要软著、备案等 |
-
----
-
-## 七、建议开发顺序（MVP 优先）
+## 项目结构
 
 ```
-第 1 步：搭建 Launcher 框架 → 替换系统桌面 → 显示一个能用的桌面
-第 2 步：实现大字体桌面布局 + 日历（阳历+阴历）
-第 3 步：联系人快捷图标 + 一键拨号
-第 4 步：微信跳转功能
-第 5 步：App 快捷方式管理
-第 6 步：打磨 UI + 真机测试
+oldman/
+├── app/
+│   ├── build.gradle.kts
+│   └── src/main/
+│       ├── AndroidManifest.xml
+│       ├── java/com/oldman/launcher/
+│       │   ├── OldManApp.kt              # Application
+│       │   ├── data/
+│       │   │   ├── dao/                   # Room DAO
+│       │   │   ├── entity/                # Room Entity
+│       │   │   ├── database/              # Room Database
+│       │   │   └── repository/            # 数据仓库
+│       │   ├── ui/
+│       │   │   ├── MainActivity.kt        # 唯一 Activity
+│       │   │   ├── components/            # Composable 组件
+│       │   │   │   ├── HomeScreen.kt      # 主屏幕
+│       │   │   │   ├── DateTimeBar.kt     # 日期时间栏
+│       │   │   │   ├── ContactGrid.kt     # 联系人网格
+│       │   │   │   ├── ContactActionDialog.kt
+│       │   │   │   └── AppShortcutGrid.kt # 快捷方式网格
+│       │   │   └── theme/                 # 主题（Color/Type）
+│       │   ├── utils/
+│       │   │   ├── LunarCalendarUtils.kt  # 农历算法
+│       │   │   └── AppLauncherUtils.kt    # App 启动工具
+│       │   └── viewmodel/
+│       │       └── MainViewModel.kt       # 主 ViewModel
+│       └── res/
+│           ├── drawable/                  # 图标
+│           └── values/                    # 颜色/字符串/主题
+├── build.gradle.kts
+├── settings.gradle.kts
+└── gradle.properties
 ```
 
 ---
 
-## 八、参考资料
+## 开始使用
 
-- [BIG Launcher 官网](http://biglauncher.com/)
-- [Senior Home - Google Play](https://play.google.com/store/apps/details?id=com.seniorlauncher.app)
-- [Simple Senior Launcher - Google Play](https://play.google.com/store/apps/details?id=com.yyi.elderlyzm)
-- Android Launcher 开发指南：[Build a Launcher](https://developer.android.com/guide/topics/launcher)
+### 环境要求
+
+- Android Studio Hedgehog (2023.1.1) 或更新
+- JDK 17
+- Gradle 8.x（项目自带 Wrapper）
+
+### 构建 & 运行
+
+```bash
+# 克隆仓库
+git clone git@github.com:lionel1949/Senior-Easy-Launcher-.git
+cd Senior-Easy-Launcher-
+
+# 调试构建
+./gradlew assembleDebug
+
+# 安装到设备
+./gradlew installDebug
+```
+
+安装后，按 Home 键选择「老年桌面」并设为始终即可。
 
 ---
 
-> 📌 **当前状态**：需求分析阶段完成，等待用户确认功能清单后进入开发。
+## 所需权限
+
+| 权限 | 用途 | 是否必须 |
+|------|------|:--------:|
+| `CALL_PHONE` | 一键拨打电话 | 是 |
+| `QUERY_ALL_PACKAGES` | 扫描已安装 App（快捷方式用） | 是 |
+| `CATEGORY_HOME` | 注册为默认桌面 | 是 |
+| `READ_CONTACTS` | 读取系统联系人 | 否（可手动录入） |
+
+---
+
+## 路线图
+
+- [x] Launcher 框架 + 桌面布局
+- [x] 阴阳历日期显示
+- [x] 联系人图标 + 一键拨号
+- [x] 微信跳转
+- [x] App 快捷方式管理
+- [ ] SOS 一键求助（GPS + 短信）
+- [ ] 设置密码保护（防误改）
+- [ ] 低电量醒目提醒
+- [ ] 未读消息红点
+
+---
+
+## 许可
+
+MIT License
+
+---
+
+> 为父母那一代人做的桌面。欢迎提 Issue 和 PR。
