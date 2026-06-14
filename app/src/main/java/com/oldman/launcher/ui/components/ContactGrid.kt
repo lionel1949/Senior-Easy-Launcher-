@@ -108,12 +108,12 @@ fun ContactCard(
                 .background(AvatarPlaceholderBg),
             contentAlignment = Alignment.Center
         ) {
-            // 默认人物图标
+            // 默认人物图标 — 使用项目内置的矢量头像
             Icon(
-                painter = painterResource(id = android.R.drawable.ic_menu_report_image),
+                painter = painterResource(id = com.oldman.launcher.R.drawable.ic_default_avatar),
                 contentDescription = "头像",
                 modifier = Modifier.size(48.dp),
-                tint = Color(0xFF9E9E9E)
+                tint = Color.Unspecified  // 保留原始颜色
             )
         }
 

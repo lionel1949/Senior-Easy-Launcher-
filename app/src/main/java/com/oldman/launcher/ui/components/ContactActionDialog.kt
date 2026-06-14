@@ -1,5 +1,6 @@
 package com.oldman.launcher.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -64,15 +65,15 @@ fun ContactActionDialog(
             dismissOnClickOutside = true
         )
     ) {
-        // 对话框容器
+        // 对话框容器 — 白色背景圆角卡片
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(24.dp)
-                .then(
-                    // 白色背景圆角卡片
-                    Modifier.padding(0.dp)
-                ),
+                .background(
+                    color = androidx.compose.ui.graphics.Color.White,
+                    shape = RoundedCornerShape(24.dp)
+                )
+                .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {

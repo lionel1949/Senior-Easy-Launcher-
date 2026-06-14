@@ -47,8 +47,8 @@ class MainActivity : ComponentActivity() {
         controller.hide(WindowInsetsCompat.Type.statusBars())
         controller.hide(WindowInsetsCompat.Type.navigationBars())
 
-        // 设置全屏 flag — 让系统栏不显示
-        window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
+        // 全屏显示通过 enableEdgeToEdge() + WindowInsetsController 实现
+        // FLAG_FULLSCREEN 已弃用，不再使用
 
         // 不让屏幕休眠时自动变暗（可选，老人可能阅读较慢）
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
