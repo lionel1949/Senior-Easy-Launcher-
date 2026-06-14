@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  老年桌面 — XML 颜色资源（用于非 Compose 场景）
+  主配色在 Color.kt 中通过 Compose API 定义
+-->
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="lunar_date_blue">#FF1A237E</color>
+    <color name="alert_red">#FFC62828</color>
+    <color name="wechat_green">#FF2E7D32</color>
+    <color name="divider_gray">#FFBDBDBD</color>
+</resources>

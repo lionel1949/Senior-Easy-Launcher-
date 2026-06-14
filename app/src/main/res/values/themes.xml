@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  老年桌面 — XML 主题（仅用于 Activity 级别的样式配置）
+  详细的 Compose UI 主题在 Theme.kt 中定义
+-->
+<resources>
+    <!--
+      Theme.OldMan — Activity 基础主题
+      - 纯白背景，无闪烁
+      - 全屏显示（无 ActionBar/TitleBar）
+      - 无启动画面动画
+    -->
+    <style name="Theme.OldMan" parent="android:Theme.Material.Light.NoActionBar">
+        <!-- 纯白背景，避免启动时闪烁 -->
+        <item name="android:windowBackground">@color/white</item>
+        <!-- 状态栏颜色（Fullscreen 后实际不可见） -->
+        <item name="android:statusBarColor">@color/white</item>
+        <!-- 导航栏颜色 -->
+        <item name="android:navigationBarColor">@color/white</item>
+    </style>
+</resources>
