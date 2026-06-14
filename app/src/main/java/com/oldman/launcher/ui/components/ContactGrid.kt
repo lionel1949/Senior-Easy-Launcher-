@@ -1,7 +1,8 @@
 package com.oldman.launcher.ui.components
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,10 +40,8 @@ import com.oldman.launcher.viewmodel.MainViewModel
 /**
  * 联系人快捷图标网格 — 2列布局
  *
- * 位于 App 快捷区下方，显示所有联系人卡片。
- * 每个卡片包含: 80dp 圆形头像 + 28sp 姓名
- *
- * 点击行为: 弹出 ContactActionDialog 让用户选择「打电话」或「打微信」
+ * 点击 → 弹出操作对话框（打电话/打微信）
+ * 长按 → 弹出编辑对话框（修改姓名、电话、微信号）
  */
 @Composable
 fun ContactGrid(
@@ -51,8 +50,10 @@ fun ContactGrid(
 ) {
     val contacts by viewModel.contacts.collectAsStateWithLifecycle()
 
-    // 当前被选中的联系人（用于弹出操作对话框）
+    // 操作对话框
     var selectedContact by remember { mutableStateOf<ContactEntity?>(null) }
+    // 编辑对话框
+    var editingContact by remember { mutableStateOf<ContactEntity?>(null) }
 
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -63,7 +64,8 @@ fun ContactGrid(
         items(contacts, key = { it.id }) { contact ->
             ContactCard(
                 contact = contact,
-                onClick = { selectedContact = contact }
+                onClick = { selectedContact = contact },
+                onLongClick = { editingContact = contact }
             )
         }
     }
@@ -75,32 +77,52 @@ fun ContactGrid(
             onDismiss = { selectedContact = null }
         )
     }
+
+    // ── 编辑对话框 ──
+    editingContact?.let { contact ->
+        ContactEditDialog(
+            contact = contact,
+            onSave = { updated ->
+                viewModel.updateContact(updated)
+                editingContact = null
+            },
+            onDelete = { toDelete ->
+                viewModel.deleteContact(toDelete)
+                editingContact = null
+            },
+            onDismiss = { editingContact = null }
+        )
+    }
 }
 
 /**
  * 单个联系人卡片
  *
  * 设计约束:
- * - 点击区域 ≥ 48dp
- * - 头像: 80dp 圆形，默认灰色占位 + 人物图标
+ * - 点击 → 打电话/打微信
+ * - 长按 → 编辑联系人信息
+ * - 头像: 80dp 圆形
  * - 姓名: 28sp 加粗
  */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ContactCard(
     contact: ContactEntity,
     onClick: () -> Unit,
+    onLongClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier
-            .clickable(onClick = onClick)
-            .padding(12.dp),  // padding 确保点击区域 ≥ 48dp
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick
+            )
+            .padding(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         // ── 圆形头像占位 (80dp) ──
-        // 实际项目中此处应从 avatarPath 加载本地图片
-        // MVP 阶段使用默认头像占位
         Box(
             modifier = Modifier
                 .size(80.dp)
@@ -108,12 +130,11 @@ fun ContactCard(
                 .background(AvatarPlaceholderBg),
             contentAlignment = Alignment.Center
         ) {
-            // 默认人物图标 — 使用项目内置的矢量头像
             Icon(
                 painter = painterResource(id = com.oldman.launcher.R.drawable.ic_default_avatar),
                 contentDescription = "头像",
                 modifier = Modifier.size(48.dp),
-                tint = Color.Unspecified  // 保留原始颜色
+                tint = Color.Unspecified
             )
         }
 
